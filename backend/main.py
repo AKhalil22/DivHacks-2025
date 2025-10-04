@@ -1,11 +1,14 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from langchain_openai import OpenAI
+import google.generativeai as genai
 from dotenv import load_dotenv
 import os
 
 load_dotenv()
+
+# Configure Gemini API
+genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
 app = FastAPI()
 
@@ -63,7 +66,8 @@ def delete_prompt(prompt_id: int):
 def generate_response(prompt_id: int):
     for p in prompts:
         if p.id == prompt_id:
-            llm = OpenAI(temperature=0.7)
-            p.response = llm(p.text)
+            model = genai.GenerativeModel('gemini-pro')
+            response = model.generate_content(p.text)
+            p.response = response.text
             return p
     raise HTTPException(status_code=404, detail="Prompt not found")
