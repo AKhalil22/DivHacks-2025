@@ -15,13 +15,14 @@
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, Apple Color Emoji, Segoe UI Emoji
 }
 
-/* Title */
+/* HelloWorld */
 .title {
   font-weight: 400;
-  margin: 0 0 32px;
-  font-size: 48px;
+  font-size: 80px;
   line-height: 1.2;
   text-align: center;
+  font-family: 'Jersey 10', sans-serif;
+  display: flex; 
 }
 
 /* Earth + shadow container */

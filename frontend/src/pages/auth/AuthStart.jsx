@@ -1,5 +1,6 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
+import './AuthStart.css'
 
 export default function AuthStart() {
   const navigate = useNavigate()
@@ -12,7 +13,7 @@ export default function AuthStart() {
         <button
           id="createAccount"
           className="auth-btn"
-          onClick={() => navigate('/auth/email')}
+          onClick={() => navigate('/auth/EmailStep')}
         >
           create account
         </button>

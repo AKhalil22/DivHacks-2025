@@ -18,7 +18,7 @@ export default function Landing() {
 
   return (
     <main className={`page ${fadeOut ? 'fade-out' : 'fade-in'}`}>
-      <h1 className="title" class="header">Hello World...</h1>
+      <h1 className="title" >Hello World.</h1>
 
       <div className="scene" aria-hidden="true">
         <img
