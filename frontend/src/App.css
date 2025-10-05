@@ -1,105 +1,98 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
-}
+/* Page layout */
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
-
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
-}
-
-.App {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
-}
-
-.create-form {
-  margin-bottom: 20px;
-}
-
-.create-form input {
-  width: 70%;
-  padding: 10px;
-  margin-right: 10px;
-}
-
-.create-form button {
-  padding: 10px 20px;
-  background-color: #4CAF50;
+/*-----------Landing page-----------*/
+.page {
+  background-color: #0d0000;
   color: white;
-  border: none;
-  cursor: pointer;
-}
-
-.prompts-list {
+  height: 100vh;
+  margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  overflow: hidden;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, Apple Color Emoji, Segoe UI Emoji
 }
 
-.prompt-item {
-  border: 1px solid #ddd;
-  padding: 15px;
-  border-radius: 5px;
+/* HelloWorld */
+.title {
+  font-weight: 400;
+  font-size: 80px;
+  line-height: 1.2;
+  text-align: center;
+  font-family: 'Jersey 10', sans-serif;
+  display: flex; 
 }
 
-.prompt-item h3 {
-  margin-top: 0;
+/* Earth + shadow container */
+.scene {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-.prompt-item p {
-  margin-bottom: 10px;
+/* Pixel-art Earth */
+.earth {
+  width: 200px;
+  image-rendering: pixelated;
+  transform-origin: center;
+  animation: float 3.2s ease-in-out infinite;
+  will-change: transform;
 }
 
-.prompt-item button {
-  margin-right: 10px;
-  padding: 5px 10px;
-  background-color: #008CBA;
-  color: white;
-  border: none;
-  cursor: pointer;
+/* Elliptical shadow */
+.shadow {
+  width: 160px;
+  height: 40px;
+  background-color: rgba(0, 50, 70, 0.8);
+  border-radius: 50%;
+  margin-top: 16px;
+  transform-origin: center;
+  animation: squash 3.2s ease-in-out infinite;
+  will-change: transform, opacity;
 }
 
-.prompt-item button:hover {
-  opacity: 0.8;
+/* Animations */
+@keyframes float {
+  0%   { transform: translateY(0) }
+  50%  { transform: translateY(-22px) }
+  100% { transform: translateY(0) }
 }
 
-.prompt-item input {
-  width: 60%;
-  padding: 5px;
-  margin-right: 10px;
+@keyframes squash {
+  0%   { transform: scale(1); opacity: 0.9 }
+  50%  { transform: scale(0.85, 0.75); opacity: 0.55 }
+  100% { transform: scale(1); opacity: 0.9 }
 }
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .earth,
+  .shadow {
+    animation: none
+  }
+}
+
+/* Fade in animation for loading page*/
+/* Fade transitions for page entry and exit */
+.fade-in {
+  animation: fadeIn 0s ease-in forwards;
+  opacity: 1;
+}
+
+.fade-out {
+  animation: fadeOut 5s ease-out forwards;
+  opacity: 1;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
