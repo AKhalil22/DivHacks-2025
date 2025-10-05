@@ -45,7 +45,8 @@ class ErrorResponse(BaseModel):
 
 class ProfileIn(BaseModel):
     display_name: str = Field(min_length=1, max_length=120)
-    username: str = Field(min_length=3, max_length=40, regex=r"^[A-Za-z0-9_]+$")
+    # Using pattern (regex deprecated keyword in Pydantic v2)
+    username: str = Field(min_length=3, max_length=40, pattern=r"^[A-Za-z0-9_]+$")
     resume_url: Optional[str] = Field(default=None)
     allow_anonymous: Optional[bool] = True
 

@@ -36,13 +36,28 @@ def get_app():
     cred_json = os.getenv(CREDENTIALS_JSON_ENV)
     cred: Optional[credentials.Base] = None
     if cred_json:
-        # Allow passing a path or raw json
+        # Allow passing a path or raw json. If the file (or JSON) appears to be a placeholder
+        # (private_key still contains REPLACE_WITH_PRIVATE_KEY), we ignore it so local dev can run
+        # without valid credentials (token verification will still fail gracefully for protected endpoints).
+        def _is_placeholder(data: dict) -> bool:
+            pk = data.get("private_key", "") or ""
+            return "REPLACE_WITH_PRIVATE_KEY" in pk
+
         if os.path.isfile(cred_json):
-            cred = credentials.Certificate(cred_json)
+            try:
+                with open(cred_json, "r", encoding="utf-8") as fh:
+                    raw = json.load(fh)
+                if not _is_placeholder(raw):
+                    cred = credentials.Certificate(raw)
+            except Exception as e:  # noqa: BLE001
+                raise FirebaseInitError(
+                    "Failed reading FIREBASE_CREDENTIALS_JSON file"
+                ) from e
         else:
             try:
                 data = json.loads(cred_json)
-                cred = credentials.Certificate(data)
+                if not _is_placeholder(data):
+                    cred = credentials.Certificate(data)
             except json.JSONDecodeError as e:
                 raise FirebaseInitError(
                     "Invalid FIREBASE_CREDENTIALS_JSON content"
