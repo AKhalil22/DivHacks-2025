@@ -1,19 +1,29 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './UsernameStep.css'
+import { upsertProfile } from '../../api/client' // add
 
 export default function UsernameStep() {
   const navigate = useNavigate()
   const [username, setUsername] = useState('')
 
   // 3–20 chars, starts with a letter, letters/numbers/underscores only
-  const usernameRegex = /^[A-Za-z][A-Za-z0-9_]{7,19}$/
+  const usernameRegex = /^[A-Za-z][A-Za-z0-9_]{2,19}$/   // fix length to 3–20
   const isValid = usernameRegex.test(username)
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     if (!isValid) return
-    navigate('/home') // change to your next route if needed
+    try {
+      await upsertProfile({
+        display_name: username,
+        username,
+      })
+      navigate('/home')
+    } catch (err) {
+      console.error('Failed to create profile', err)
+      // Optional: surface an error toast/message
+    }
   }
 
   return (

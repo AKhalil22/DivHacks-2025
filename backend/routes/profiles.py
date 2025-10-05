@@ -1,6 +1,7 @@
 from __future__ import annotations
 from fastapi import APIRouter, HTTPException, Depends
 from google.cloud import firestore
+from google.cloud.firestore_v1 import FieldFilter
 import time
 
 from ..deps import get_current_user, UserContext
@@ -8,7 +9,6 @@ from ..firebase import get_db
 from ..schemas import ProfileIn, ProfileOut
 
 router = APIRouter(prefix="/profiles", tags=["profiles"])
-
 
 @router.post(
     "",
@@ -24,13 +24,18 @@ async def create_or_update_profile(
 
     # Check uniqueness
     existing = list(
-        users_ref.where("username_lower", "==", username_lower).limit(1).stream()
+        users_ref.where(
+            filter=FieldFilter("username_lower", "==", username_lower)
+        ).limit(1).stream()
     )
+
+    # If username is taken by another user, reject
     if existing:
         doc = existing[0]
         if doc.id != user["uid"]:
             raise HTTPException(status_code=409, detail="Username already taken")
 
+    # Create or update profile    
     doc_ref = users_ref.document(user["uid"])
     now = time.time()
     data = {
@@ -46,6 +51,8 @@ async def create_or_update_profile(
 
     created_new = False
 
+    # Transaction to create or update atomically
+    @firestore.transactional
     def txn(transaction: firestore.Transaction):
         nonlocal created_new
         snapshot = doc_ref.get(transaction=transaction)
@@ -59,8 +66,8 @@ async def create_or_update_profile(
             created_new = True
         return created_at_local
 
-    transaction = db.transaction()
-    created_at = transaction.call(txn)
+    # Run the transaction (decorator manages begin/commit/retries)
+    created_at = txn(db.transaction())
 
     out = ProfileOut(
         uid=user["uid"],
