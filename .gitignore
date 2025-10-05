@@ -1,0 +1,36 @@
+# Top-level gitignore additions for secrets and build artifacts
+
+# Python caches
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+.env/
+.venv/
+venv/
+
+# Node installs
+frontend/node_modules/
+
+# Firebase / secrets
+backend/firebase-service-account.json
+backend/*.env
+*.env
+!.env.example
+
+# IDE/editor
+.vscode/
+.idea/
+.DS_Store
+
+# Pytest cache
+.pytest_cache/
+
+# Coverage
+htmlcov/
+.coverage*
+
+# Build outputs
+/dist/
+/build/
