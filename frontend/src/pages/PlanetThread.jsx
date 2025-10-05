@@ -2,19 +2,11 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import './PlanetThread.css'
 
-/** tiny white SVG icons */
+/* ---- username helpers ---- */
+const getUsername = () => localStorage.getItem('username') || 'Anonymous'
+
+/* ---- tiny white SVG icons ---- */
 const Icon = {
-  // Add this inside your Icon object:
-  paperclip: (props) => (
-  <svg viewBox="0 0 24 24" fill="none" {...props}>
-    <path
-      d="M21.44 11.05l-8.49 8.49a5.5 5.5 0 01-7.78-7.78L13.66 3.27a4 4 0 115.66 5.66L8.88 19.38a2.5 2.5 0 11-3.54-3.54L15.59 5.59"
-      stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-    />
-  </svg>
-
-  ),
-
   back: (props) => (
     <svg viewBox="0 0 24 24" aria-hidden="true" {...props}>
       <path fill="currentColor" d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
@@ -59,7 +51,7 @@ const Icon = {
   ),
 }
 
-/** inline SVG avatar (data URI) for anonymous users */
+/* ---- inline anon avatar (data URI) ---- */
 const ANON_AVATAR =
   'data:image/svg+xml;utf8,' +
   encodeURIComponent(
@@ -76,10 +68,191 @@ const ANON_AVATAR =
     </svg>`
   )
 
-const SAMPLE_TEXT =
-  "So yes: people remembered more content from text, but were more accurate at saying that certain information was from audio. This pattern replicates Johnson & Raye’s source-monitoring framework: perceptual detail (richer in audio) makes source discrimination easier."
+/* ---------- titles per planet ---------- */
+const TITLES = {
+  earth: 'Earth Forum',
+  purple: 'Girls in Tech',
+  orange: 'Design',
+  turquoise: 'AI / ML',
+  orangeblue: 'Hardware',
+  bacon: 'Kevin • Networking',
+}
 
-/** --- localStorage helpers (per-planet) --- */
+/* ---------- planet-specific seed content ---------- */
+const seedsFor = (planetId, username) => {
+  const u = username || 'Anonymous'
+  switch (planetId) {
+    case 'purple': // Girls in Tech
+      return [
+        {
+          id: 'p1',
+          author: u,
+          body:
+            "What helped you most when starting out? Mentorship? Communities? I’m organizing a beginner-friendly study group.",
+          score: 5, ts: '2h', avatar: null,
+          comments: [
+            { id: 'c1', author: 'Maya', text: 'Meetups + a Discord accountability channel.' },
+            { id: 'c2', author: 'Jules', text: 'Women Who Code workshops were amazing.' },
+          ],
+        },
+        {
+          id: 'p2',
+          author: 'Ava',
+          body:
+            "Impostor syndrome tips? I freeze when I’m the only woman in the room.",
+          score: 8, ts: '5h', avatar: null,
+          comments: [{ id: 'c3', author: u, text: 'Prep notes + one concrete win to share helps me.' }],
+        },
+        {
+          id: 'p3',
+          author: 'Sam',
+          body:
+            "Resources for conference scholarships or speaker CFPs?",
+          score: 3, ts: '1d', avatar: null,
+          comments: [{ id: 'c4', author: 'Nia', text: 'Check out PyLadies + local tech foundations.' }],
+        },
+      ]
+
+    case 'orange': // Design
+      return [
+        {
+          id: 'p1',
+          author: u,
+          body:
+            "What’s your Figma → dev handoff flow? Struggling to keep tokens tidy.",
+          score: 4, ts: '1h', avatar: null,
+          comments: [{ id: 'c1', author: 'Rex', text: 'Style dictionary + documented tokens FTW.' }],
+        },
+        {
+          id: 'p2',
+          author: 'Lina',
+          body:
+            "Critique request: onboarding mock — empty states too heavy?",
+          score: 2, ts: '7h', avatar: null,
+          comments: [{ id: 'c2', author: 'Oli', text: 'Lighten copy; add one success illustration.' }],
+        },
+        {
+          id: 'p3',
+          author: 'Theo',
+          body:
+            "Favorite usability test script templates?",
+          score: 1, ts: '22h', avatar: null,
+          comments: [],
+        },
+      ]
+
+    case 'turquoise': // AI / ML
+      return [
+        {
+          id: 'p1',
+          author: 'Ada',
+          body:
+            "Best small open dataset for RAG demos? Needs citations + diverse domains.",
+          score: 6, ts: '4h', avatar: null,
+          comments: [{ id: 'c1', author: u, text: 'Gov docs + wiki extracts work well.' }],
+        },
+        {
+          id: 'p2',
+          author: u,
+          body:
+            "Anyone tried LoRA on a 7B for classification? Curious about batch sizes on a 3090.",
+          score: 3, ts: '9h', avatar: null,
+          comments: [{ id: 'c2', author: 'Devon', text: 'bs 16–32, watch grad accumulation.' }],
+        },
+        {
+          id: 'p3',
+          author: 'Kai',
+          body:
+            "Prompt eval ideas beyond BLEU/ROUGE?",
+          score: 5, ts: '1d', avatar: null,
+          comments: [{ id: 'c3', author: 'V', text: 'Task-driven eval + human rubric.' }],
+        },
+      ]
+
+    case 'orangeblue': // Hardware
+      return [
+        {
+          id: 'p1',
+          author: u,
+          body:
+            "Show us your tiny builds! I’ve got a Pi Zero cyberdeck; any heat tips?",
+          score: 7, ts: '3h', avatar: null,
+          comments: [{ id: 'c1', author: 'Max', text: 'Copper shim + small blower fan works.' }],
+        },
+        {
+          id: 'p2',
+          author: 'Ivy',
+          body:
+            "Best starter keyboard kit for hot-swap + low profile?",
+          score: 4, ts: '11h', avatar: null,
+          comments: [{ id: 'c2', author: u, text: 'Check Nuphy + Keychron.' }],
+        },
+        {
+          id: 'p3',
+          author: 'Rob',
+          body:
+            "How are you powering e-paper displays outdoors?",
+          score: 2, ts: '1d', avatar: null,
+          comments: [],
+        },
+      ]
+
+    case 'bacon': // Kevin • Networking
+      return [
+        {
+          id: 'p1',
+          author: u,
+          body:
+            "Cold DM template that actually gets replies? Trying to meet PMs named… Kevin 👀",
+          score: 9, ts: '1h', avatar: null,
+          comments: [
+            { id: 'c1', author: 'Nora', text: 'Lead with value + 1 line ask.' },
+            { id: 'c2', author: 'Lee', text: 'Mutuals matter—mention shared events.' },
+          ],
+        },
+        {
+          id: 'p2',
+          author: 'Kevin',
+          body:
+            "I host a monthly coffee for folks changing roles—drop your city if you want invites.",
+          score: 12, ts: '8h', avatar: null,
+          comments: [{ id: 'c3', author: u, text: 'NYC here! Would love to join.' }],
+        },
+        {
+          id: 'p3',
+          author: 'Ari',
+          body:
+            "Quick portfolio opener when meeting recruiters?",
+          score: 3, ts: '1d', avatar: null,
+          comments: [{ id: 'c4', author: 'Mo', text: '1 line problem → 1 line result with numbers.' }],
+        },
+      ]
+
+    case 'earth': // Earth Forum (generic)
+    default:
+      return [
+        {
+          id: 'p1',
+          author: u,
+          body:
+            "Welcome to TechSpace! Share what you’re building this week.",
+          score: 5, ts: '2h', avatar: null,
+          comments: [{ id: 'c1', author: 'A', text: 'Prototype of a campus app.' }],
+        },
+        {
+          id: 'p2',
+          author: 'B',
+          body:
+            "Anyone want to pair on a small JS game?",
+          score: 2, ts: '7h', avatar: null,
+          comments: [{ id: 'c2', author: u, text: 'I’m in! DM me.' }],
+        },
+        { id: 'p3', author: 'C', body: 'Show & tell Friday ideas?', score: 1, ts: '1d', avatar: null, comments: [] },
+      ]
+  }
+}
+
+/* ---- localStorage helpers (per-planet) ---- */
 const storageKey = (planetId) => `planetThread:${planetId || 'unknown'}`
 
 const loadPosts = (planetId) => {
@@ -87,23 +260,7 @@ const loadPosts = (planetId) => {
     const raw = localStorage.getItem(storageKey(planetId))
     if (raw) return JSON.parse(raw)
   } catch {}
-  // seed if nothing saved yet for this planet
-  return [
-    {
-      id: 'p1',
-      author: 'LambOverRice',
-      body: SAMPLE_TEXT,
-      score: 2,
-      avatar: null,
-      ts: '2h',
-      comments: [
-        { id: 'c1', author: 'Anon', text: 'Interesting take!' },
-        { id: 'c2', author: 'Reader42', text: 'Agree on source-monitoring.' },
-      ],
-    },
-    { id: 'p2', author: 'LambOverRice', body: SAMPLE_TEXT, score: 2, avatar: null, ts: '3h', comments: [] },
-    { id: 'p3', author: 'LambOverRice', body: SAMPLE_TEXT, score: 2, avatar: null, ts: '6h', comments: [] },
-  ]
+  return seedsFor(planetId, getUsername())
 }
 
 const savePosts = (planetId, posts) => {
@@ -112,7 +269,7 @@ const savePosts = (planetId, posts) => {
   } catch {}
 }
 
-// convert File -> data URL so images persist across reloads
+// File -> data URL so images persist across reloads
 const fileToDataURL = (file) =>
   new Promise((resolve, reject) => {
     const r = new FileReader()
@@ -126,31 +283,21 @@ export default function PlanetThread({ planetId: propPlanetId }) {
   const planetId = propPlanetId ?? params.planetId
   const navigate = useNavigate()
 
-  /** posts persisted per planet */
+  const username = useMemo(() => getUsername(), [])
+
   const [posts, setPosts] = useState(() => loadPosts(planetId))
 
-  // when planetId changes, load that planet’s saved posts
-  useEffect(() => {
-    setPosts(loadPosts(planetId))
-  }, [planetId])
+  useEffect(() => { setPosts(loadPosts(planetId)) }, [planetId])
+  useEffect(() => { savePosts(planetId, posts) }, [planetId, posts])
 
-  // persist whenever posts change for this planet
-  useEffect(() => {
-    savePosts(planetId, posts)
-  }, [planetId, posts])
-
-  // composer (bottom)
+  // composer
   const [text, setText] = useState('')
   const [file, setFile] = useState(null)
   const [preview, setPreview] = useState(null)
 
-  // per-post comment drafts
   const [commentDrafts, setCommentDrafts] = useState({})
 
-  const title = useMemo(
-    () => ((planetId && planetId !== 'earth') ? 'Girls in Tech' : 'Earth Forum'),
-    [planetId]
-  )
+  const title = TITLES[planetId] || 'Planet Thread'
 
   const handleFile = (e) => {
     const f = e.target.files?.[0]
@@ -162,15 +309,13 @@ export default function PlanetThread({ planetId: propPlanetId }) {
   const submitPost = async (e) => {
     e.preventDefault()
     if (!text.trim() && !file) return
-
     let imageDataUrl = null
     if (file) {
       try { imageDataUrl = await fileToDataURL(file) } catch {}
     }
-
     const newPost = {
       id: `p${Date.now()}`,
-      author: 'You',
+      author: username,
       body: text.trim(),
       score: 0,
       avatar: null,
@@ -178,11 +323,8 @@ export default function PlanetThread({ planetId: propPlanetId }) {
       image: imageDataUrl,
       comments: [],
     }
-    // append to bottom
     setPosts(prev => [...prev, newPost])
-    setText('')
-    setFile(null)
-    setPreview(null)
+    setText(''); setFile(null); setPreview(null)
   }
 
   const setDraftFor = (postId, val) =>
@@ -194,7 +336,7 @@ export default function PlanetThread({ planetId: propPlanetId }) {
     setPosts(prev =>
       prev.map(p =>
         p.id === postId
-          ? { ...p, comments: [...p.comments, { id: `c${Date.now()}`, author: 'You', text: draft }] }
+          ? { ...p, comments: [...p.comments, { id: `c${Date.now()}`, author: username, text: draft }] }
           : p
       )
     )
@@ -203,7 +345,6 @@ export default function PlanetThread({ planetId: propPlanetId }) {
 
   return (
     <div className="thread-wrap">
-      {/* Header */}
       <header className="thread-header">
         <button className="back-btn" onClick={() => navigate(-1)} aria-label="Back">
           <Icon.back className="icon" />
@@ -215,11 +356,8 @@ export default function PlanetThread({ planetId: propPlanetId }) {
         </div>
 
         <div className="brand">TechSpace</div>
-
-        {/* live bubbles removed for now */}
       </header>
 
-      {/* Posts */}
       <main className="thread-main">
         {posts.map(p => (
           <article key={p.id} className="post">
@@ -259,7 +397,6 @@ export default function PlanetThread({ planetId: propPlanetId }) {
                 </button>
               </div>
 
-              {/* comments */}
               {p.comments.length > 0 && (
                 <ul className="comments">
                   {p.comments.map(c => (
@@ -278,7 +415,6 @@ export default function PlanetThread({ planetId: propPlanetId }) {
                 </ul>
               )}
 
-              {/* comment composer */}
               <div className="comment-composer">
                 <input
                   type="text"
@@ -307,7 +443,6 @@ export default function PlanetThread({ planetId: propPlanetId }) {
         ))}
       </main>
 
-      {/* New post composer at bottom */}
       <form className="composer" onSubmit={submitPost}>
         <label htmlFor="composer-input" className="composer-label">Type here:</label>
         <div className="composer-row">
@@ -320,10 +455,10 @@ export default function PlanetThread({ planetId: propPlanetId }) {
             rows={3}
           />
           <div className="composer-actions">
-            <label className="file-btn" title="Attach file">
-              <Icon.paperclip className="icon" />
+            <label className="file-btn" title="Attach image">
+              <Icon.image className="icon" />
               <input type="file" accept="image/*" onChange={handleFile} />
-          </label>
+            </label>
             <button type="submit" className="send-btn" disabled={!text.trim() && !file}>
               <Icon.send className="icon" />
               <span>Post</span>
