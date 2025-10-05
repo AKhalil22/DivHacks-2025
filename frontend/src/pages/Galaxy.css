@@ -1,0 +1,75 @@
+.galaxy-wrap {
+  position: relative;
+  height: 100vh;
+  background: #0b0000;
+  overflow: hidden;
+  color: #fff;
+}
+
+/* Scrollable viewport to “pan” across a large canvas */
+.galaxy-viewport {
+  position: absolute;
+  inset: 0;
+  overflow: auto;
+}
+
+/* Large canvas with a simple starfield */
+.galaxy-canvas {
+  position: relative;
+  width: 2400px;               /* large surface area */
+  height: 1400px;
+  background:
+    radial-gradient(2px 2px at 20% 30%, #fff6 50%, transparent 51%),
+    radial-gradient(1px 1px at 70% 60%, #fff3 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 45% 80%, #fff5 50%, transparent 51%),
+    #0b0000;
+}
+
+/* Generic planet button */
+.planet {
+  position: absolute;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  transition: transform .2s ease, box-shadow .2s ease, filter .2s ease;
+  outline: none;
+  will-change: transform, filter;
+}
+
+/* Hover/focus highlight */
+.planet:hover,
+.planet:focus-visible {
+  transform: scale(1.08);
+  box-shadow: 0 0 30px 6px rgba(255,255,255,0.15);
+  filter: brightness(1.08) saturate(1.05);
+}
+
+/* Planet textures — ensure files exist under /public/images */
+.planet-earth  { background-image: url('/images/earth.png'); }
+.planet-purple { background-image: url('/images/purpleripplyplanet.webp'); }
+.planet-blue   { background-image: url('/images/orangeripplyplanet.webp'); }
+.planet-red    { background-image: url('/images/turquoisemeteorplanet.png'); }
+
+/* HUD overlay */
+.hud {
+  position: absolute;
+  left: 28px;
+  top: 24px;
+  text-shadow: 0 2px 10px rgba(0,0,0,.5);
+  pointer-events: none; /* clicks pass through to planets */
+}
+
+.hud h1 {
+  margin: 0 0 6px;
+  font-size: clamp(22px, 2.4vw, 32px);
+  font-weight: 800;
+}
+
+.hud p {
+  margin: 0;
+  opacity: .85;
+  font-size: clamp(12px, 1.5vw, 16px);
+}
