@@ -1,5 +1,5 @@
 // src/App.jsx
-import React from "react"
+import React, { useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
 
 import Landing from "./pages/Landing.jsx"
@@ -18,6 +18,9 @@ import "./App.css"
 import "./index.css"
 
 export default function App() {
+  // Init: Default user's name
+  const [userName, setUserName] = useState("LambOverRice");
+
   return (
     <Router>
       <Routes>
@@ -25,8 +28,8 @@ export default function App() {
         <Route path="/auth" element={<AuthStart />} />
         <Route path="/auth/EmailStep" element={<EmailStep />} />
         <Route path="/auth/PasswordStep" element={<PasswordStep />} />
-        <Route path="/auth/username" element={<UsernameStep />} />
-        <Route path="/home" element={<Home />} />
+        <Route path="/auth/username" element={<UsernameStep userName={userName} setUserName={setUserName} />}/>
+        <Route path="/home" element={<Home userName={userName} setUserName={setUserName} />}/>
   
         <Route path="/profile" element={<Profile />} />
         {/* All planets go to the thread UI */}

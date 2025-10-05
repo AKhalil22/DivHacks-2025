@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './UsernameStep.css'
 
-export default function UsernameStep() {
+export default function UsernameStep({ userName, setUserName }) {
   const navigate = useNavigate()
   const [username, setUsername] = useState('')
 
@@ -13,7 +13,9 @@ export default function UsernameStep() {
   const handleSubmit = (e) => {
     e.preventDefault()
     if (!isValid) return
-    navigate('/home') // change to your next route if needed
+
+    setUserName(username) // Update the global userName state
+    navigate('/home') // Navigate to the home page
   }
 
   return (

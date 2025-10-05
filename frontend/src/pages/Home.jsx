@@ -20,7 +20,7 @@ const PLANETS = [
   { id: 'bacon',     name: 'Networking',       img: bacon,        left: '25%', top: '75%', size: 130 },
 ]
 
-export default function Home() {
+export default function Home({ userName, setUserName }) {
   const navigate = useNavigate()
   const viewportRef = useRef(null)
   const canvasRef = useRef(null)
@@ -62,7 +62,7 @@ export default function Home() {
       </div>
 
       <div className='hud'>
-        <h1>Welcome LambOverRice</h1>
+        <h1>Welcome {userName}</h1>
         <p>Explore other planet forums or create your own.</p>
       </div>
     </div>
