@@ -11,6 +11,8 @@ import UsernameStep from "./pages/auth/UsernameStep.jsx"
 import Home from "./pages/Home.jsx"
 import Profile from "./pages/Profile.jsx"
 import PlanetRouter from "./pages/PlanetRouter.jsx"
+import EarthStartThread from "./pages/EarthStartThread.jsx";
+
 
 import "./App.css"
 import "./index.css"
@@ -25,10 +27,11 @@ export default function App() {
         <Route path="/auth/PasswordStep" element={<PasswordStep />} />
         <Route path="/auth/username" element={<UsernameStep />} />
         <Route path="/home" element={<Home />} />
+  
         <Route path="/profile" element={<Profile />} />
-
         {/* All planets go to the thread UI */}
         <Route path="/planet/:planetId" element={<PlanetRouter />} />
+        <Route path="/planet/earth" element={<EarthStartThread />} />
       </Routes>
     </Router>
   )
