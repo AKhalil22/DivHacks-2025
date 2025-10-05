@@ -4,8 +4,8 @@ from pydantic import BaseModel, Field
 import time
 from typing import Literal
 
-from ..deps import get_current_user, UserContext, rate_limit
-from ..firebase import get_db
+from .. import deps
+from .. import firebase
 
 router = APIRouter(prefix="", tags=["moderation"])
 
@@ -36,11 +36,11 @@ class BlockOut(BaseModel):
 @router.post("/reports", response_model=ReportOut, status_code=202)
 async def create_report(
     payload: ReportIn,
-    user: UserContext = Depends(get_current_user),
-    _=Depends(rate_limit),
+    user: deps.UserContext = Depends(deps.get_current_user),
+    _=Depends(deps.rate_limit),
 ):
     # For MVP we just persist to a collection; moderation system can process async.
-    db = get_db()
+    db = firebase.get_db()
     now = time.time()
     doc_ref = db.collection("reports").document()
     data = {
@@ -64,12 +64,12 @@ async def create_report(
 @router.post("/blocks", response_model=BlockOut, status_code=201)
 async def block_user(
     payload: BlockIn,
-    user: UserContext = Depends(get_current_user),
-    _=Depends(rate_limit),
+    user: deps.UserContext = Depends(deps.get_current_user),
+    _=Depends(deps.rate_limit),
 ):
     if payload.blocked_uid == user["uid"]:
         raise HTTPException(status_code=422, detail="Cannot block yourself")
-    db = get_db()
+    db = firebase.get_db()
     now = time.time()
     doc_ref = db.collection("blocks").document(f"{user['uid']}__{payload.blocked_uid}")
     doc_ref.set(

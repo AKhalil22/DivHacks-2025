@@ -70,8 +70,17 @@ def get_app():
 
 @lru_cache(maxsize=1)
 def get_db() -> firestore.Client:
+    """Return a Firestore client bound to the initialized firebase app.
+
+    google-cloud-firestore exposes the Client class (preferred) rather than a top-level
+    factory function named `client` (older docs sometimes show firestore.client()).
+    Using the correct constructor avoids AttributeError in newer library versions.
+    """
     app = get_app()
-    return firestore.client(app=app)  # type: ignore[arg-type]
+    # The Client constructor accepts the app via the credentials already initialized; passing
+    # project explicitly ensures consistency in tests where only project id is set.
+    project_id = os.getenv(PROJECT_ID_ENV)
+    return firestore.Client(project=project_id)  # type: ignore[return-value]
 
 
 def verify_token(id_token: str) -> Dict[str, Any]:
