@@ -7,8 +7,8 @@ import httpx
 from fastapi import APIRouter, HTTPException, Depends, Response
 from firebase_admin import auth as fb_auth
 
-from ..firebase import get_db, verify_token
-from ..deps import get_current_user
+from .. import firebase
+from .. import deps
 from ..schemas import (
     RegisterRequest,
     RegisterResponse,
@@ -22,7 +22,6 @@ from ..schemas import (
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
-FIREBASE_WEB_API_KEY = os.getenv("FIREBASE_WEB_API_KEY")
 SESSION_COOKIE_MAX_AGE = int(os.getenv("SESSION_COOKIE_MAX_AGE", "3600"))
 ISSUE_SESSION_COOKIE = os.getenv("ISSUE_SESSION_COOKIE", "false").lower() in {"1", "true", "yes"}
 
@@ -35,9 +34,10 @@ def _error(status: int, msg: str, details: Optional[dict] = None):
 
 
 async def _sign_in_with_password(email: str, password: str):
-    if not FIREBASE_WEB_API_KEY:
+    api_key = os.getenv("FIREBASE_WEB_API_KEY")
+    if not api_key:
         _error(500, "Server missing FIREBASE_WEB_API_KEY")
-    url = f"{IDENTITY_BASE}/accounts:signInWithPassword?key={FIREBASE_WEB_API_KEY}"
+    url = f"{IDENTITY_BASE}/accounts:signInWithPassword?key={api_key}"
     async with httpx.AsyncClient(timeout=10) as client:
         r = await client.post(url, json={"email": email, "password": password, "returnSecureToken": True})
     if r.status_code != 200:
@@ -46,9 +46,10 @@ async def _sign_in_with_password(email: str, password: str):
 
 
 async def _exchange_refresh_token(refresh_token: str):
-    if not FIREBASE_WEB_API_KEY:
+    api_key = os.getenv("FIREBASE_WEB_API_KEY")
+    if not api_key:
         _error(500, "Server missing FIREBASE_WEB_API_KEY")
-    url = f"{SECURETOKEN_BASE}/token?key={FIREBASE_WEB_API_KEY}"
+    url = f"{SECURETOKEN_BASE}/token?key={api_key}"
     data = {"grant_type": "refresh_token", "refresh_token": refresh_token}
     async with httpx.AsyncClient(timeout=10) as client:
         r = await client.post(url, data=data)
@@ -62,7 +63,7 @@ def _bundle(id_token: str, refresh_token: str, expires_in: int) -> TokenBundle:
 
 
 def _ensure_profile(uid: str, display_name: str, username: str):
-    db = get_db()
+    db = firebase.get_db()
     users_ref = db.collection("users")
     doc_ref = users_ref.document(uid)
     snap = doc_ref.get()
@@ -89,7 +90,7 @@ def _ensure_profile(uid: str, display_name: str, username: str):
 @router.post("/register", response_model=RegisterResponse, status_code=201)
 async def register(payload: RegisterRequest):
     # Username uniqueness (case-insensitive)
-    db = get_db()
+    db = firebase.get_db()
     users_ref = db.collection("users")
     existing = list(users_ref.where("username_lower", "==", payload.username.lower()).limit(1).stream())
     if existing:
@@ -160,15 +161,15 @@ async def refresh(payload: RefreshRequest):
     expires_in = int(data.get("expires_in") or data.get("expiresIn") or 3600)
     # Verify id token to ensure still valid (defense-in-depth)
     try:
-        verify_token(id_token)
+        firebase.verify_token(id_token)
     except Exception:
         _error(401, "Invalid refreshed token")
     return RefreshResponse(tokens=_bundle(id_token, refresh_token, expires_in))
 
 
 @router.get("/me", response_model=AuthUserProfile)
-async def me(user=Depends(get_current_user)):
-    db = get_db()
+async def me(user=Depends(deps.get_current_user)):
+    db = firebase.get_db()
     snap = db.collection("users").document(user["uid"]).get()
     if not snap.exists:
         _error(404, "Profile not found")
