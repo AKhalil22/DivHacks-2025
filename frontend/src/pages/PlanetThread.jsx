@@ -4,6 +4,17 @@ import './PlanetThread.css'
 
 /** tiny white SVG icons */
 const Icon = {
+  // Add this inside your Icon object:
+  paperclip: (props) => (
+  <svg viewBox="0 0 24 24" fill="none" {...props}>
+    <path
+      d="M21.44 11.05l-8.49 8.49a5.5 5.5 0 01-7.78-7.78L13.66 3.27a4 4 0 115.66 5.66L8.88 19.38a2.5 2.5 0 11-3.54-3.54L15.59 5.59"
+      stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+    />
+  </svg>
+
+  ),
+
   back: (props) => (
     <svg viewBox="0 0 24 24" aria-hidden="true" {...props}>
       <path fill="currentColor" d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
@@ -309,10 +320,10 @@ export default function PlanetThread({ planetId: propPlanetId }) {
             rows={3}
           />
           <div className="composer-actions">
-            <label className="file-btn" title="Attach image">
-              <Icon.image className="icon" />
+            <label className="file-btn" title="Attach file">
+              <Icon.paperclip className="icon" />
               <input type="file" accept="image/*" onChange={handleFile} />
-            </label>
+          </label>
             <button type="submit" className="send-btn" disabled={!text.trim() && !file}>
               <Icon.send className="icon" />
               <span>Post</span>
