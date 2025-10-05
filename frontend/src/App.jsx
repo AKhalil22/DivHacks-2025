@@ -1,108 +1,49 @@
-import { useState, useEffect } from 'react'
-import axios from 'axios'
-import './App.css'
+import React, { useEffect, useState } from "react";
+import Landing from "./pages/Landing.jsx";
+import Home from "./pages/Home.jsx";
+import Planet from "./pages/Planet.jsx";
+import Profile from "./pages/Profile.jsx";
 
-const API_BASE = 'http://localhost:8000'
+// 👇 NEW: auth flow pages
+import AuthStart from "./pages/auth/AuthStart.jsx";
+import EmailStep from "./pages/auth/EmailStep.jsx";
+import PasswordStep from "./pages/auth/PasswordStep.jsx";
+import UsernameStep from "./pages/auth/UsernameStep.jsx";
+import BioStep from "./pages/auth/BioStep.jsx";
 
-function App() {
-  const [prompts, setPrompts] = useState([])
-  const [newPromptText, setNewPromptText] = useState('')
-  const [editingId, setEditingId] = useState(null)
-  const [editText, setEditText] = useState('')
+export default function App() {
+  const [path, setPath] = useState(window.location.pathname);
 
   useEffect(() => {
-    fetchPrompts()
-  }, [])
+    const onPop = () => setPath(window.location.pathname);
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
 
-  const fetchPrompts = async () => {
-    try {
-      const response = await axios.get(`${API_BASE}/prompts`)
-      setPrompts(response.data)
-    } catch (error) {
-      console.error('Error fetching prompts:', error)
-    }
-  }
+  const navigate = (to) => {
+    window.history.pushState({}, "", to);
+    setPath(to);
+  };
 
-  const createPrompt = async () => {
-    if (!newPromptText.trim()) return
-    try {
-      await axios.post(`${API_BASE}/prompts`, { text: newPromptText })
-      setNewPromptText('')
-      fetchPrompts()
-    } catch (error) {
-      console.error('Error creating prompt:', error)
-    }
-  }
+  const parts = path.split("/").filter(Boolean);
+  const [first, second] = parts;
 
-  const updatePrompt = async (id) => {
-    if (!editText.trim()) return
-    try {
-      await axios.put(`${API_BASE}/prompts/${id}`, { text: editText, response: prompts.find(p => p.id === id).response })
-      setEditingId(null)
-      setEditText('')
-      fetchPrompts()
-    } catch (error) {
-      console.error('Error updating prompt:', error)
-    }
-  }
+  // Landing
+  if (!first) return <Landing navigate={navigate} />;
 
-  const deletePrompt = async (id) => {
-    try {
-      await axios.delete(`${API_BASE}/prompts/${id}`)
-      fetchPrompts()
-    } catch (error) {
-      console.error('Error deleting prompt:', error)
-    }
-  }
+  // 👇 NEW: Auth routes
+  if (first === "auth" && !second)       return <AuthStart   navigate={navigate} />;
+  if (first === "auth" && second === "email")     return <EmailStep   navigate={navigate} />;
+  if (first === "auth" && second === "password")  return <PasswordStep navigate={navigate} />;
+  if (first === "auth" && second === "username")  return <UsernameStep navigate={navigate} />;
+  if (first === "auth" && second === "bio")       return <BioStep      navigate={navigate} />;
 
-  const generateResponse = async (id) => {
-    try {
-      await axios.post(`${API_BASE}/generate/${id}`)
-      fetchPrompts()
-    } catch (error) {
-      console.error('Error generating response:', error)
-    }
-  }
+  // Core app routes
+  if (first === "home")    return <Home navigate={navigate} />;
+  if (first === "profile") return <Profile />;
+  if (first === "planet" && second)
+    return <Planet planetId={second} navigate={navigate} />;
 
-  return (
-    <div className="App">
-      <h1>AI Prompt Manager</h1>
-      <div className="create-form">
-        <input
-          type="text"
-          value={newPromptText}
-          onChange={(e) => setNewPromptText(e.target.value)}
-          placeholder="Enter new prompt"
-        />
-        <button onClick={createPrompt}>Create Prompt</button>
-      </div>
-      <div className="prompts-list">
-        {prompts.map((prompt) => (
-          <div key={prompt.id} className="prompt-item">
-            {editingId === prompt.id ? (
-              <div>
-                <input
-                  type="text"
-                  value={editText}
-                  onChange={(e) => setEditText(e.target.value)}
-                />
-                <button onClick={() => updatePrompt(prompt.id)}>Save</button>
-                <button onClick={() => setEditingId(null)}>Cancel</button>
-              </div>
-            ) : (
-              <div>
-                <h3>Prompt: {prompt.text}</h3>
-                <p>Response: {prompt.response}</p>
-                <button onClick={() => { setEditingId(prompt.id); setEditText(prompt.text) }}>Edit</button>
-                <button onClick={() => deletePrompt(prompt.id)}>Delete</button>
-                <button onClick={() => generateResponse(prompt.id)}>Generate AI Response</button>
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
-    </div>
-  )
+  // Fallback
+  return <Landing navigate={navigate} />;
 }
-
-export default App
