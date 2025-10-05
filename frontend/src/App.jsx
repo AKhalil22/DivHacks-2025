@@ -3,13 +3,15 @@ import Landing from "./pages/Landing.jsx";
 import Home from "./pages/Home.jsx";
 import Planet from "./pages/Planet.jsx";
 import Profile from "./pages/Profile.jsx";
-
+import "./index.css"; // global css
 // 👇 NEW: auth flow pages
+/*
 import AuthStart from "./pages/auth/AuthStart.jsx";
 import EmailStep from "./pages/auth/EmailStep.jsx";
 import PasswordStep from "./pages/auth/PasswordStep.jsx";
 import UsernameStep from "./pages/auth/UsernameStep.jsx";
 import BioStep from "./pages/auth/BioStep.jsx";
+*/
 
 export default function App() {
   const [path, setPath] = useState(window.location.pathname);
