@@ -1,10 +1,9 @@
 :root {
   --bg: #0b0000;
-  --panel: #3e3957;   /* purple panel */
+  --panel: #3e3957;
   --panelText: #ffffff;
   --muted: #cfcbe6;
-  --accent: #ffffff;  /* send button when ready */
-  --chip: rgba(255,255,255,.14);
+  --accent: #ffffff;
 }
 
 .earth-wrap {
@@ -15,8 +14,11 @@
   grid-template-rows: auto auto 1fr auto;
 }
 
+/* Centered title + back arrow in top-left */
 .earth-header {
-  padding: 24px 24px 6px;
+  position: relative;
+  padding: 20px 56px 6px; /* extra side padding so back button doesn't overlap title */
+  text-align: center;     /* centers the title */
 }
 
 .earth-title {
@@ -26,17 +28,42 @@
   letter-spacing: .4px;
 }
 
-/* Composer panel */
-.composer {
-  padding: 0 24px;
+.back-btn {
+  position: absolute;
+  left: 16px;
+  top: 16px;
+  border: none;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+  padding: 6px;
+  line-height: 0;
 }
+.back-btn:hover { opacity: .9; }
+
+/* Composer (unchanged from your last version) */
+.composer { padding: 0 24px; }
 
 .composer-label {
   display: block;
   color: var(--muted);
-  margin: 12px 0 8px;
+  margin: 14px 0 8px;
   font-weight: 600;
-  font-size: 16px;
+  font-size: 20px;
+}
+
+.thread-name-input {
+  width: 100%;
+  height: 44px;
+  border: none;
+  outline: none;
+  border-radius: 8px;
+  padding: 0 12px;
+  background: rgba(255,255,255,.1);
+  color: #fff;
+  font-size: 20px;
+  margin-top: 10px;
+  
 }
 
 .composer-row {
@@ -61,112 +88,20 @@
   line-height: 1.45;
 }
 
-.composer-side {
-  display: flex;
-  align-items: flex-start;
-}
+.composer-side { display: flex; align-items: flex-start; }
 
 .send-btn {
-  height: 40px;
-  min-width: 120px;
+  height: 40px; min-width: 120px;
   padding: 0 18px;
   border: none;
   border-radius: 8px;
-  background: #cfcfcf;       /* disabled look */
-  color: #111;
+  background: #cfcfcf; color: #111;
   font-weight: 800;
   cursor: not-allowed;
   transition: filter .15s ease, transform .15s ease, background .15s ease;
 }
-
-.send-btn.ready {
-  background: var(--accent);  /* pure white when ready */
-  cursor: pointer;
-}
-
-.send-btn.ready:hover {
-  filter: brightness(.95);
-  transform: translateY(-1px);
-}
-
-/* Tags */
-.tagbar {
-  display: grid;
-  gap: 10px;
-  margin-top: 10px;
-}
-
-.tag-add {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  border: none;
-  background: transparent;
-  color: #fff;
-  opacity: .9;
-  cursor: pointer;
-  padding: 8px 0 0 6px;
-}
-
-.tag-icon {
-  width: 22px;
-  height: 22px;
-  color: #fff;
-}
-
-.tag-input-row {
-  display: flex;
-  gap: 8px;
-  padding-left: 6px;
-}
-
-.tag-input {
-  height: 36px;
-  border-radius: 8px;
-  border: none;
-  outline: none;
-  padding: 0 10px;
-  background: rgba(255,255,255,.1);
-  color: #fff;
-}
-
-.tag-save {
-  height: 36px;
-  padding: 0 12px;
-  border-radius: 8px;
-  border: none;
-  background: #ffffff;
-  color: #121212;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.tag-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding-left: 6px;
-  margin: 0;
-  list-style: none;
-}
-
-.tag-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: var(--chip);
-  padding: 6px 10px;
-  border-radius: 999px;
-}
-
-.chip-text { font-weight: 700; }
-.chip-x {
-  border: none;
-  background: transparent;
-  color: #fff;
-  font-size: 16px;
-  cursor: pointer;
-}
+.send-btn.ready { background: var(--accent); cursor: pointer; }
+.send-btn.ready:hover { filter: brightness(.95); transform: translateY(-1px); }
 
 /* Earth image */
 .earth-hero {
@@ -174,16 +109,11 @@
   place-items: center;
   padding: 18px 24px 8px;
 }
-
 .earth-hero img {
-  max-width: min(60vw, 500px);
+  width: clamp(480px, 90vw, 1400px);
   height: auto;
-  image-rendering: pixelated;   /* keep the pixel-art vibe */
+  image-rendering: pixelated;
 }
 
 /* Brand */
-.brand {
-  padding: 18px 24px 28px;
-  font-weight: 900;
-  opacity: .9;
-}
+.brand { padding: 18px 24px 28px; font-weight: 900; opacity: .9; }
