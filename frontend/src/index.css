@@ -1,6 +1,23 @@
 @import url('https://fonts.googleapis.com/css2?family=Jersey+10&display=swap');
 
-.blah {
-  font-family: 'Jersey 10', sans-serif;
+.heading {
+  font-family: "Jersey 10", sans-serif;
+  font-size: 48px;
+  margin-bottom: 40px;
+  font-weight: 50;
 }
 
+
+.confirm-button {
+  margin-top: 20px;
+  padding: 10px 30px;
+  font-size: 16px;
+  font-weight: 50;
+  background-color: #ccc;          /* disabled gray */
+  color: black;
+  border: none;
+  border-radius: 8px;
+  cursor: not-allowed;
+  transition: filter 0.15s ease, transform 0.15s ease, background-color 0.15s ease;
+  font-family: 'Jersey 10', sans-serif;
+}

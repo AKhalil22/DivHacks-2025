@@ -18,13 +18,13 @@ export default function EmailStep() {
   const handleSubmit = (e) => {
     e.preventDefault()
     if (isValid) {
-      navigate("/auth/password") // ✅ go to next step
+      navigate("/auth/PasswordStep") // ✅ go to next step
     }
   }
 
   return (
     <main className="email-page">
-      <h1 className="email-title">What’s your email?</h1>
+      <h1 className="heading">What’s your email?</h1>
 
       <form className="email-form" onSubmit={handleSubmit}>
         <div className="email-input-wrapper">
@@ -39,9 +39,9 @@ export default function EmailStep() {
           {isValid && <span className="checkmark">✓</span>}
         </div>
 
-        <button
+        <button 
           type="submit"
-          className="email-btn"
+          className="confirm-button"
           disabled={!isValid}
         >
           confirm
