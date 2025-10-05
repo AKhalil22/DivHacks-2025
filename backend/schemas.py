@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 from typing import List, Optional, Literal, Any
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, validator, EmailStr
 import base64
 import json
 
@@ -39,8 +39,14 @@ def decode_comment_cursor(token: str) -> Optional[dict[str, Any]]:
     return decode_cursor(token)
 
 
-class ErrorResponse(BaseModel):
-    detail: str
+class APIError(BaseModel):
+    code: int
+    message: str
+    details: Optional[dict[str, Any]] = None
+
+
+class ErrorEnvelope(BaseModel):
+    error: APIError
 
 
 class ProfileIn(BaseModel):
@@ -79,6 +85,63 @@ class ProfileOut(BaseModel):
     resume_url: Optional[str]
     created_at: float
     updated_at: float
+
+
+# Auth Models
+USERNAME_PATTERN = r"^[A-Za-z0-9_]{3,24}$"
+
+
+class RegisterRequest(BaseModel):
+    email: EmailStr
+    password: str = Field(min_length=8, max_length=128)
+    display_name: str = Field(min_length=1, max_length=120)
+    username: str = Field(pattern=USERNAME_PATTERN)
+
+    @validator("username")
+    def norm_username(cls, v: str) -> str:  # noqa: D401
+        return v.strip()
+
+    @validator("display_name")
+    def norm_display(cls, v: str) -> str:
+        v = v.strip()
+        if not v:
+            raise ValueError("display_name cannot be empty")
+        return v
+
+
+class LoginRequest(BaseModel):
+    email: EmailStr
+    password: str = Field(min_length=8, max_length=128)
+
+
+class RefreshRequest(BaseModel):
+    refresh_token: str = Field(min_length=10)
+
+
+class TokenBundle(BaseModel):
+    id_token: str
+    refresh_token: str
+    expires_in: int
+
+
+class AuthUserProfile(BaseModel):
+    uid: str
+    email: EmailStr
+    display_name: str
+    username: str
+
+
+class RegisterResponse(BaseModel):
+    user: AuthUserProfile
+    tokens: TokenBundle
+
+
+class LoginResponse(BaseModel):
+    tokens: TokenBundle
+
+
+class RefreshResponse(BaseModel):
+    tokens: TokenBundle
 
 
 class ThreadCreate(BaseModel):

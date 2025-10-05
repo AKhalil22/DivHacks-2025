@@ -61,12 +61,36 @@ pip install -r backend/requirements.txt
 cp .env.example .env  # set real values
 uvicorn backend.main:app --reload
 ```
-Frontend:
+Frontend (hot dev server, different port):
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
+
+## Single Port Mode (Serve Frontend & API on :8000)
+For a unified local or lightweight deploy where both the React app (static build) and the API share the SAME origin (`http://127.0.0.1:8000`):
+
+1. Build the frontend:
+   ```bash
+   ./build_frontend.sh   # runs npm install (if needed) + vite build
+   ```
+2. Start the backend (will also serve the built assets if `frontend/dist` exists):
+   ```bash
+   ./run_backend.sh
+   ```
+3. Navigate to: http://127.0.0.1:8000
+
+The `backend/main.py` auto-mounts `frontend/dist` at root (`/`) with an SPA fallback. Any unknown path (without a file extension) returns `index.html` so React Router can handle client-side routes.
+
+If port 8000 is busy the script aborts (instead of auto-incrementing) to enforce a single shared origin.
+
+### When to Use
+- Use separate dev servers (Vite 5173 + API 8000) during active frontend development for fast HMR.
+- Use single port mode for demos, simplified local testing, or deployment to environments expecting a single process.
+
+### CORS Note
+In single-port mode you can remove `ALLOWED_ORIGINS` customization since requests are same-origin. In dual-port dev keep `ALLOWED_ORIGINS=http://localhost:5173` (default) or add additional origins as needed.
 
 ## Key Endpoints (Summary)
 - POST /profiles (create/update, 201 on first create)
