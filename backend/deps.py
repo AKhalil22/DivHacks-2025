@@ -17,21 +17,29 @@ class UserContext(Dict[str, Any]):
 
 
 async def get_current_user(authorization: Optional[str] = Header(None)) -> UserContext:
+    """Return authenticated user context.
+
+    Test bypass mode (TEST_BYPASS_AUTH=1) now only supplies a dummy user when *no* Authorization
+    header is provided. This lets tests that monkeypatch deps.get_current_user still take effect
+    and allows explicit Bearer tokens (patched verify flows) to be exercised. This change fixes
+    /auth/me 404 caused by always returning a synthetic uid that did not correspond to test-created
+    profiles.
+    """
+    bypass = __import__("os").getenv("TEST_BYPASS_AUTH") == "1"
+    if (not authorization or not authorization.startswith("Bearer ")) and bypass:
+        return UserContext(uid="test-user", email_verified=None)
     if not authorization or not authorization.startswith("Bearer "):
-        raise HTTPException(
-            status_code=401, detail="Missing or invalid Authorization header"
-        )
+        raise HTTPException(status_code=401, detail="Missing or invalid Authorization header")
     token = authorization.split(" ", 1)[1].strip()
     try:
         decoded = verify_token(token)
     except ValueError:
         raise HTTPException(status_code=401, detail="Invalid token")
-    return UserContext(
-        uid=decoded.get("uid"), email_verified=decoded.get("email_verified")
-    )
+    return UserContext(uid=decoded.get("uid"), email_verified=decoded.get("email_verified"))
 
 
 async def rate_limit(user: UserContext = Depends(get_current_user)):
+    # Always enforce even in bypass so tests like rate_limit_429 can validate behavior.
     now = time.time()
     window = int(now // 60)
     key = f"{user['uid']}:{window}"
