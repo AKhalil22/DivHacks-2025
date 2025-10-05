@@ -1,11 +1,72 @@
-#root {
-  max-width: flex;
-  margin: 0 auto;
-  padding: 2rem;
+/* Page layout */
+.page {
+  background-color: #0d0000;
+  color: white;
+  height: 100vh;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  overflow: hidden;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, Apple Color Emoji, Segoe UI Emoji
+}
+
+/* Title */
+.title {
+  font-weight: 400;
+  margin: 0 0 32px;
+  font-size: 48px;
+  line-height: 1.2;
   text-align: center;
 }
 
-h1 {
-  font-size: 2.5rem;
-  margin-top: -10px;
+/* Earth + shadow container */
+.scene {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Pixel-art Earth */
+.earth {
+  width: 180px;
+  image-rendering: pixelated;
+  transform-origin: center;
+  animation: float 3.2s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* Elliptical shadow */
+.shadow {
+  width: 160px;
+  height: 40px;
+  background-color: rgba(0, 50, 70, 0.8);
+  border-radius: 50%;
+  margin-top: 16px;
+  transform-origin: center;
+  animation: squash 3.2s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+/* Animations */
+@keyframes float {
+  0%   { transform: translateY(0) }
+  50%  { transform: translateY(-22px) }
+  100% { transform: translateY(0) }
+}
+
+@keyframes squash {
+  0%   { transform: scale(1); opacity: 0.9 }
+  50%  { transform: scale(0.85, 0.75); opacity: 0.55 }
+  100% { transform: scale(1); opacity: 0.9 }
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .earth,
+  .shadow {
+    animation: none
+  }
 }
