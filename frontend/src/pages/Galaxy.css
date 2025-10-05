@@ -1,3 +1,4 @@
+/* ==== Canvas & background ==== */
 .galaxy-canvas {
   position: relative;
 
@@ -15,27 +16,36 @@
     #0b0000 url('../../images/starfield_natural.png') center / cover no-repeat;
 }
 
-
 .galaxy-wrap {
   position: relative;
   height: 100vh;
   background: #0b0000;
   color: #fff;
-  overflow: hidden;              /* no page scrollbars */
+  overflow: hidden; /* no page scrollbars */
 }
 
 /* Small, bounded scroll only inside the viewport */
 .galaxy-viewport {
   position: absolute;
   inset: 0;
-  overflow: auto;                /* allow a little pan */
+  overflow: auto; /* allow a little pan */
 }
 
-
-
-/* Planet buttons (image set inline via style in Home.jsx) */
-.planet {
+/* ==== Planet + hover label ==== */
+/* wrapper that positions button + label together */
+.planet-wrap {
   position: absolute;
+  /* place the center of the wrap at the given left/top percentage */
+  transform: translate(-50%, -50%);
+  display: grid;
+  place-items: center;
+}
+
+/* the planet button itself fills the wrapper */
+.planet {
+  position: relative;           /* wrapper handles absolute positioning */
+  width: 100%;
+  height: 100%;
   border: none;
   border-radius: 50%;
   cursor: pointer;
@@ -48,7 +58,24 @@
   will-change: transform, filter;
 }
 
-/* Subtle hover */
+/* over-planet label: hidden until hover/focus */
+.planet-label {
+  position: absolute;
+  inset: 0;                     /* span entire planet */
+  display: grid;
+  place-items: center;
+  padding: 4px 8px;
+  color: #fff;
+  font-weight: 800;
+  text-align: center;
+  opacity: 0;
+  transform: scale(0.98);
+  text-shadow: 0 2px 10px rgba(0,0,0,.6), 0 0 8px rgba(0,0,0,.6);
+  pointer-events: none;         /* clicks go to the planet button */
+  transition: opacity .15s ease, transform .15s ease;
+}
+
+/* subtle hover effect on planet */
 .planet:hover,
 .planet:focus-visible {
   transform: scale(1.05);
@@ -56,7 +83,14 @@
   filter: brightness(1.06) saturate(1.04);
 }
 
-/* HUD */
+/* reveal label when hovering the wrapper or focusing the button */
+.planet-wrap:hover .planet-label,
+.planet-wrap:focus-within .planet-label {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* ==== HUD ==== */
 .hud {
   position: absolute;
   left: 28px;
