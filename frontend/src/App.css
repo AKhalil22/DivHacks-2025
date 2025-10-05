@@ -1,4 +1,6 @@
 /* Page layout */
+
+/*-----------Landing page-----------*/
 .page {
   background-color: #0d0000;
   color: white;
@@ -31,7 +33,7 @@
 
 /* Pixel-art Earth */
 .earth {
-  width: 180px;
+  width: 200px;
   image-rendering: pixelated;
   transform-origin: center;
   animation: float 3.2s ease-in-out infinite;
@@ -69,4 +71,68 @@
   .shadow {
     animation: none
   }
+}
+
+/* Fade in animation for loading page*/
+/* Fade transitions for page entry and exit */
+.fade-in {
+  animation: fadeIn 0s ease-in forwards;
+  opacity: 1;
+}
+
+.fade-out {
+  animation: fadeOut 5s ease-out forwards;
+  opacity: 1;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+/*--------------AuthStart------------- */
+
+
+.auth {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+
+.auth-title {
+  font-size: 48px;
+  font-family: 'Jersey 10', sans-serif;
+  margin-bottom: 48px;
+}
+
+.auth-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.auth-btn {
+  padding: 12px 24px;
+  font-size: 14px;
+  background: white;
+  color: black;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.auth-link {
+  font-size: 14px;
+  color: white;
+  background: transparent;
+  border: none;
+  text-decoration: underline;
+  cursor: pointer;
 }

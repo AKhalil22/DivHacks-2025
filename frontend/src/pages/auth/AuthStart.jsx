@@ -1,20 +1,30 @@
-//import React from "react";
+import React from 'react'
+import { useNavigate } from 'react-router-dom'
 
-export default function AuthStart({ navigate }) {
+export default function AuthStart() {
+  const navigate = useNavigate()
+
   return (
-    <div className="full-center dark-stage">
-      <div style={{ textAlign: "center" }}>
-        <h1 className="pixel-title">TechSpace</h1>
-        <div style={{ display: "grid", gap: 12 }}>
-          <button className="cta" onClick={() => navigate("/auth/email")}>
-            create account
-          </button>
-          <button className="link-btn" onClick={() => navigate("/auth/signin")}>
-            sign in
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
+    <main className="auth">
+      <h1 className="auth-title header">TechSpace</h1>
 
+      <div className="auth-actions">
+        <button
+          id="createAccount"
+          className="auth-btn"
+          onClick={() => navigate('/auth/email')}
+        >
+          create account
+        </button>
+
+        <button
+          id="signIn"
+          className="auth-link"
+          onClick={() => navigate('/auth/signin')}
+        >
+          sign in
+        </button>
+      </div>
+    </main>
+  )
+}
