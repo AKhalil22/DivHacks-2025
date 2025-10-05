@@ -1,9 +1,10 @@
 """Shared dependencies: auth, rate limiting."""
 
 from __future__ import annotations
+import os
+import time
 from fastapi import Header, HTTPException, Depends
 from .firebase import verify_token, get_db
-import time
 from typing import Optional, Dict, Any
 
 RATE_LIMIT_PER_MIN = int(__import__("os").getenv("RATE_LIMIT_PER_MINUTE", "120"))
@@ -16,19 +17,22 @@ class UserContext(Dict[str, Any]):
     uid: str  # type: ignore[assignment]
 
 
-async def get_current_user(authorization: Optional[str] = Header(None)) -> UserContext:
-    if not authorization or not authorization.startswith("Bearer "):
-        raise HTTPException(
-            status_code=401, detail="Missing or invalid Authorization header"
-        )
+def get_current_user(authorization: str | None = Header(default=None)):
+    # Dev-only bypass: if set, skip Firebase verification
+    dev_uid = os.getenv("DEV_BYPASS_UID")
+    if dev_uid:
+        return {"uid": dev_uid}
+
+    if not authorization:
+        raise HTTPException(status_code=401, detail="Missing Authorization header")
+    if not authorization.lower().startswith("bearer "):
+        raise HTTPException(status_code=400, detail="Expected 'Authorization: Bearer <token>'")
+
     token = authorization.split(" ", 1)[1].strip()
     try:
-        decoded = verify_token(token)
-    except ValueError:
-        raise HTTPException(status_code=401, detail="Invalid token")
-    return UserContext(
-        uid=decoded.get("uid"), email_verified=decoded.get("email_verified")
-    )
+        return verify_token(token)
+    except Exception:
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
 
 
 async def rate_limit(user: UserContext = Depends(get_current_user)):

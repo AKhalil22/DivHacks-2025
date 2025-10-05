@@ -5,10 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 import os
 
-from .routes.profiles import router as profiles_router
-from .routes.threads import router as threads_router
-from .routes.comments import router as comments_router
-from .routes.moderation import router as moderation_router
+import uvicorn
 
 load_dotenv()
 
@@ -34,6 +31,12 @@ def create_app() -> FastAPI:
     async def healthz():
         return {"status": "ok"}
 
+    # import routers here to avoid import-time/package/circular-import issues
+    from .routes.profiles import router as profiles_router
+    from .routes.threads import router as threads_router
+    from .routes.comments import router as comments_router
+    from .routes.moderation import router as moderation_router
+
     app.include_router(profiles_router)
     app.include_router(threads_router)
     app.include_router(comments_router)
@@ -41,6 +44,13 @@ def create_app() -> FastAPI:
     return app
 
 
-app = create_app()
+# Note: run the app from the project root with:
+#    uvicorn backend:app --reload
+# Running "python backend/main.py" will break relative imports.
+# If you really want to run via this file directly, run:
+#    python -m uvicorn backend:app --reload
+# (keep this block only for convenience; prefer the uvicorn command above)
+if __name__ == "__main__":
+    import uvicorn as _uv
 
-__all__ = ["create_app", "app"]
+    _uv.run("backend:app", host="0.0.0.0", port=8000, reload=True)
