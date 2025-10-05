@@ -10,6 +10,9 @@ import Planet from "./pages/Planet.jsx"
 import Profile from "./pages/Profile.jsx"
 import PasswordStep from "./pages/auth/PasswordStep.jsx"
 import UsernameStep from './pages/auth/UsernameStep.jsx'
+import SignIn from './pages/SignIn.jsx'
+import CreateAccount from './pages/CreateAccount.jsx'
+import { RequireAuth, PublicOnly } from './context/RouteGuards.jsx'
 
 
 import "./index.css" // global css
@@ -23,8 +26,10 @@ export default function App() {
         <Route path="/auth/EmailStep" element={<EmailStep />} />
         <Route path="/auth/PasswordStep" element={<PasswordStep />} />
         <Route path="/auth/username" element={<UsernameStep />} />
-        <Route path="/home" element={<Home />} />
-        <Route path="/profile" element={<Profile />} />
+        <Route path="/home" element={<RequireAuth><Home /></RequireAuth>} />
+        <Route path="/signin" element={<PublicOnly><SignIn /></PublicOnly>} />
+        <Route path="/register" element={<PublicOnly><CreateAccount /></PublicOnly>} />
+        <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
         <Route path="/planet/:planetId" element={<Planet />} />
       </Routes>
     </Router>
