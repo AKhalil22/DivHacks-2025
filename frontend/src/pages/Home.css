@@ -1,0 +1,6 @@
+:root, body, #root { height: 100%; }
+
+@media (max-width: 640px) {
+  .planet { transform: scale(.95); }
+  .planet:hover { transform: scale(1.0); }
+}
