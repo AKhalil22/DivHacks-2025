@@ -1,23 +1,34 @@
+.galaxy-canvas {
+  position: relative;
+
+  /* your size rules (keep whatever you already have) */
+  width: min(115vw, 1600px);
+  height: min(115vh, 1000px);
+
+  /* 👇 use the image as the background */
+  background: #0b0000 url('../../images/starfield_natural.png') center / cover no-repeat;
+}
+
 .galaxy-wrap {
   position: relative;
   height: 100vh;
   background: #0b0000;
-  overflow: hidden;
   color: #fff;
+  overflow: hidden;              /* no page scrollbars */
 }
 
-/* Scrollable viewport to “pan” across a large canvas */
+/* Small, bounded scroll only inside the viewport */
 .galaxy-viewport {
   position: absolute;
   inset: 0;
-  overflow: auto;
+  overflow: auto;                /* allow a little pan */
 }
 
-/* Large canvas with a simple starfield */
+/* Make the canvas only ~15% bigger than the screen */
 .galaxy-canvas {
   position: relative;
-  width: 2400px;               /* large surface area */
-  height: 1400px;
+  width: min(115vw, 1600px);     /* ~15% wider than viewport, capped */
+  height: min(115vh, 1000px);    /* ~15% taller than viewport, capped */
   background:
     radial-gradient(2px 2px at 20% 30%, #fff6 50%, transparent 51%),
     radial-gradient(1px 1px at 70% 60%, #fff3 50%, transparent 51%),
@@ -25,7 +36,7 @@
     #0b0000;
 }
 
-/* Generic planet button */
+/* Planet buttons (image set inline via style in Home.jsx) */
 .planet {
   position: absolute;
   border: none;
@@ -34,38 +45,34 @@
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+  background-color: transparent;
   transition: transform .2s ease, box-shadow .2s ease, filter .2s ease;
   outline: none;
   will-change: transform, filter;
 }
 
-/* Hover/focus highlight */
+/* Subtle hover */
 .planet:hover,
 .planet:focus-visible {
-  transform: scale(1.08);
-  box-shadow: 0 0 30px 6px rgba(255,255,255,0.15);
-  filter: brightness(1.08) saturate(1.05);
+  transform: scale(1.05);
+  box-shadow: 0 0 24px 6px rgba(255,255,255,0.12);
+  filter: brightness(1.06) saturate(1.04);
 }
 
-/* Planet textures — ensure files exist under /public/images */
-.planet-earth  { background-image: url('/images/earth.png'); }
-.planet-purple { background-image: url('/images/purpleripplyplanet.webp'); }
-.planet-blue   { background-image: url('/images/orangeripplyplanet.webp'); }
-.planet-red    { background-image: url('/images/turquoisemeteorplanet.png'); }
-
-/* HUD overlay */
+/* HUD */
 .hud {
   position: absolute;
   left: 28px;
   top: 24px;
   text-shadow: 0 2px 10px rgba(0,0,0,.5);
-  pointer-events: none; /* clicks pass through to planets */
+  pointer-events: none;
 }
 
 .hud h1 {
   margin: 0 0 6px;
-  font-size: clamp(22px, 2.4vw, 32px);
-  font-weight: 800;
+  font-family: "Jersey 10", sans-serif;
+  font-size: clamp(28px, 5vw, 48px);
+  font-weight: 500;
 }
 
 .hud p {

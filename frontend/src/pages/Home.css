@@ -1,12 +1,6 @@
-/* Home-specific tweaks (kept tiny so most styles live in Galaxy.css) */
+:root, body, #root { height: 100%; }
 
-/* Make sure the page itself fills the viewport */
-:root, body, #root {
-  height: 100%;
-}
-
-/* Optional: soften the starfield on small screens */
 @media (max-width: 640px) {
-  .planet { transform: scale(.92); }
-  .planet:hover { transform: scale(1.02); }
+  .planet { transform: scale(.95); }
+  .planet:hover { transform: scale(1.0); }
 }
