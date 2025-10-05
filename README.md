@@ -158,6 +158,3 @@ Coverage highlights: profiles lifecycle, duplicate username (409), pagination fl
 
 ## Contributing
 Issues & PRs welcome. Please open an issue describing significant feature proposals before large changes.
-
-## License / Attribution
-Internal project for DivHacks 2025 hackathon. Add a LICENSE file before open‑sourcing.
