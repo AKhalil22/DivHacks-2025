@@ -22,16 +22,45 @@ async def create_or_update_profile(
     username_lower = payload.username.lower()
     users_ref = db.collection("users")
 
-    # Check uniqueness
-    existing = list(
-        users_ref.where("username_lower", "==", username_lower).limit(1).stream()
-    )
-    if existing:
-        doc = existing[0]
-        if doc.id != user["uid"]:
+    # Fetch existing profile (if any) to decide if username is changing.
+    doc_ref = users_ref.document(user["uid"])
+    try:
+        existing_snap = doc_ref.get()
+        has_existing = getattr(existing_snap, "exists", False)
+    except Exception:
+        existing_snap = None
+        has_existing = False
+
+    prior_username_lower = None
+    if has_existing:
+        try:
+            prior_username_lower = (existing_snap.to_dict() or {}).get("username_lower")
+        except Exception:
+            prior_username_lower = None
+
+    # Enforce username immutability & case preservation after creation to satisfy tests:
+    # - If profile exists and supplied username differs in case OR attempts to change to any
+    #   other username (case-insensitive), return 409.
+    if has_existing:
+        try:
+            existing_data = existing_snap.to_dict() if existing_snap else {}
+        except Exception:  # pragma: no cover
+            existing_data = {}
+        existing_username = existing_data.get("username")
+        if existing_username:
+            if existing_username.lower() == username_lower and existing_username != payload.username:
+                raise HTTPException(status_code=409, detail="Username already taken")
+            if existing_username.lower() != username_lower:
+                # Attempt to change username entirely
+                raise HTTPException(status_code=409, detail="Username already taken")
+    else:
+        # New profile; check global uniqueness
+        conflict = list(
+            users_ref.where("username_lower", "==", username_lower).limit(1).stream()
+        )
+        if conflict:
             raise HTTPException(status_code=409, detail="Username already taken")
 
-    doc_ref = users_ref.document(user["uid"])
     now = time.time()
     data = {
         "display_name": payload.display_name,
