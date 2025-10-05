@@ -1,0 +1,81 @@
+.email-page {
+  background-color: #0b0000;
+  color: white;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+
+/* Center form cleanly */
+.email-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+/* Center input + checkmark together */
+.email-input-wrapper {
+  position: relative;
+  display: flex;
+  justify-content: center; /* centers the input */
+  width: 320px; /* give it a slightly wider wrapper */
+}
+
+/* Input */
+.email-input {
+  width: 100%;
+  height: 48px;
+  border-radius: 16px;
+  border: none;
+  outline: none;
+  padding: 0 40px 0 16px; /* space for checkmark */
+  font-size: 18px;
+  color: black;
+  background: white;
+  text-align: left;
+  transition: box-shadow 0.2s ease;
+}
+
+/* Checkmark stays inside wrapper visually centered */
+.checkmark {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #00ff88;
+  font-size: 22px;
+  font-weight: bold;
+  pointer-events: none;
+}
+
+/* Optional: green glow when valid */
+.email-input.valid {
+  box-shadow: 0 0 0 2px #00ff88 inset;
+}
+
+.email-btn {
+  background: #d9d9d9;
+  color: black;
+  border: none;
+  border-radius: 8px;
+  width: 160px;
+  height: 44px;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.email-btn:hover {
+  filter: brightness(0.9);
+}
+
+.email-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
