@@ -1,13 +1,20 @@
 .galaxy-canvas {
   position: relative;
 
-  /* your size rules (keep whatever you already have) */
+  /* size */
   width: min(115vw, 1600px);
   height: min(115vh, 1000px);
 
-  /* 👇 use the image as the background */
-  background: #0b0000 url('../../images/starfield_natural.png') center / cover no-repeat;
+  /* background — image + optional faint stars; image must be the bottom layer */
+  background:
+    /* optional star glints on top */
+    radial-gradient(2px 2px at 20% 30%, #fff6 50%, transparent 51%),
+    radial-gradient(1px 1px at 70% 60%, #fff3 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 45% 80%, #fff5 50%, transparent 51%),
+    /* base image */
+    #0b0000 url('../../images/starfield_natural.png') center / cover no-repeat;
 }
+
 
 .galaxy-wrap {
   position: relative;
@@ -24,17 +31,7 @@
   overflow: auto;                /* allow a little pan */
 }
 
-/* Make the canvas only ~15% bigger than the screen */
-.galaxy-canvas {
-  position: relative;
-  width: min(115vw, 1600px);     /* ~15% wider than viewport, capped */
-  height: min(115vh, 1000px);    /* ~15% taller than viewport, capped */
-  background:
-    radial-gradient(2px 2px at 20% 30%, #fff6 50%, transparent 51%),
-    radial-gradient(1px 1px at 70% 60%, #fff3 50%, transparent 51%),
-    radial-gradient(1.5px 1.5px at 45% 80%, #fff5 50%, transparent 51%),
-    #0b0000;
-}
+
 
 /* Planet buttons (image set inline via style in Home.jsx) */
 .planet {
