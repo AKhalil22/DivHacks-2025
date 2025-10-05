@@ -1,15 +1,44 @@
-# TechSpace Backend & Frontend
+<p align="center">
+  <img src="frontend/public/vite.svg" alt="Logo" width="72" height="72" />
+  <h1 align="center">DivHacks 2025 – TechSpace</h1>
+  <p align="center">Inclusive, mental‑health–oriented discussion “planets” for underrepresented folks in tech.</p>
+</p>
 
-TechSpace is a platform fostering inclusive, mental-health–oriented discussion spaces (“planets”) for underrepresented folks in tech. The backend is a production-grade FastAPI service integrating Firebase Auth (ID token verification) and Firestore (Native mode) for persistence.
+---
 
-## Stack
-- **Backend**: FastAPI (Python 3.11+), Firestore, Firebase Admin
-- **Auth**: Client-side Firebase email/password; server verifies ID tokens
-- **Frontend**: React + Vite
-- **Testing**: pytest + httpx TestClient
-- **Tooling**: ruff, black, bleach (sanitization), markdown-it-py (extensible), uvicorn
+## Overview
+TechSpace is a full‑stack project (FastAPI + React/Vite) created for DivHacks 2025. It enables users to create themed discussion threads (“planets”), post comments anonymously or publicly, and exercise basic moderation/reporting. The architecture emphasizes safety (sanitization, rate limiting, masked identities) and future extensibility (ranking, moderation intelligence, real‑time updates).
 
-## High-Level Data Model
+## Features
+### Backend (FastAPI)
+- Firebase ID token (Bearer) authentication integration
+- Thread & comment creation with cursor pagination (opaque base64 tokens)
+- Anonymity model (masking of `author_uid` when `author_mode=anon`)
+- In‑memory per‑user rate limiting (configurable) with 429 responses
+- Username uniqueness & immutability enforcement
+- Basic moderation primitives (reports, user blocks)
+- Markdown-ish body sanitization via Bleach
+
+### Frontend (React + Vite)
+- SPA served separately (dev) or from the API (single‑port mode)
+- Auth context & guarded routes
+- Thread list, thread detail, create thread, profile & signup flows
+- Theming & planetary imagery for “galaxy” navigation metaphor
+
+### Testing
+- pytest suite covering: profiles, duplicate username conflict, pagination (threads/comments), validation (422), rate limiting (429), not found (404), invalid auth (401)
+- Dummy in‑memory Firestore stand‑ins for deterministic fast tests
+
+## Tech Stack
+| Layer      | Technologies |
+|------------|--------------|
+| Backend    | FastAPI (Python 3.11+), Firebase Admin, Firestore (Native) |
+| Auth       | Client Firebase Email/Password (tokens verified server‑side) |
+| Frontend   | React, Vite |
+| Tooling    | ruff, black, bleach, markdown-it-py, uvicorn |
+| Testing    | pytest, httpx TestClient |
+
+## Data Model
 Collections:
 ```
 users/{uid}
@@ -18,33 +47,38 @@ threads/{threadId}/comments/{commentId}
 reports/{reportId}
 blocks/{blockCompositeId}
 ```
-`threads` store title, body (sanitized), tags[], author_uid, author_mode (public|anon), comment_count, last_activity, timestamps. `comments` store body, author_uid, author_mode, created_at, score (future ranking), timestamps handled at creation.
+`threads`: title, body (sanitized), tags[], author_uid, author_mode (public|anon), comment_count, last_activity, timestamps.
+
+`comments`: body, author_uid, author_mode, created_at, score (future ranking).
 
 ## Anonymity Model
-- Users choose `author_mode` per thread/comment.
-- Server always stores `author_uid` for accountability & moderation.
-- API masks `author_uid` (returns null) when `author_mode = anon`.
-- Future: add privileged moderator role to view identity.
-
-## Rate Limiting
-In-memory per-user/minute bucket (env: `RATE_LIMIT_PER_MINUTE`, default 120). Returns HTTP 429 when exceeded. For horizontal scaling, replace with Redis or Cloud Memorystore (token bucket or sliding window). Not cluster-safe as currently implemented.
+- Server always stores raw `author_uid`.
+- Response masks UID (returns `null`) if the content was posted with `author_mode=anon`.
+- Extensible for moderator override / auditing.
 
 ## Pagination
-- Threads: ordered by `last_activity desc`, opaque base64 cursor (doc id + timestamp).
-- Comments: `sort=new` by `created_at desc`; `sort=top` by `(score desc, created_at desc)`; cursor includes (id, ts, score for top).
+| Entity   | Sort(s) | Cursor Payload |
+|----------|---------|----------------|
+| Threads  | last_activity desc | id + timestamp |
+| Comments | new: created_at desc; top: score desc + created_at desc | id + ts (+ score) |
+
+Base64‑encoded cursors keep client logic opaque & future‑proof.
+
+## Rate Limiting
+Simple in‑memory bucket keyed by user+minute. Env: `RATE_LIMIT_PER_MINUTE` (default 120). Replace with Redis / Memorystore for production multi‑instance deployments.
 
 ## Required Firestore Indexes
-Create these composite indexes early to avoid runtime build delays:
-1. Threads list filtered by tag + ordered by last_activity:
-   - Collection: `threads`
-   - Fields: `tags` (Array contains) + `last_activity` (Descending)
-2. Comments top sorting:
-   - Collection: `threads/{threadId}/comments`
+Composite:
+1. Threads by tag + last_activity desc  
+   - Collection: `threads`  
+   - Fields: `tags` (Array contains), `last_activity` (Descending)
+2. Comments top sort  
+   - Collection: `threads/{threadId}/comments`  
    - Fields: `score` (Descending), `created_at` (Descending)
 
-Single-field indexes (enabled by default) required: `last_activity`, `created_at`, `username_lower`, `comment_count`.
+Single‑field (default): `last_activity`, `created_at`, `username_lower`, `comment_count`.
 
-## Environment Variables (.env)
+## Environment Variables
 See `.env.example`:
 ```
 FIREBASE_PROJECT_ID=<project>
@@ -52,74 +86,78 @@ FIREBASE_CREDENTIALS_JSON=./service-account.json
 ALLOWED_ORIGINS=http://localhost:5173
 RATE_LIMIT_PER_MINUTE=120
 ```
+Optional:
+```
+TEST_BYPASS_AUTH=1  # development/test helper (still requires Authorization header)
+```
 
 ## Local Development
+Backend:
 ```bash
 python -m venv .venv
 source .venv/bin/activate
 pip install -r backend/requirements.txt
-cp .env.example .env  # set real values
+cp .env.example .env   # fill in real values
 uvicorn backend.main:app --reload
 ```
-Frontend (hot dev server, different port):
+Frontend (separate dev server):
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
 
-## Single Port Mode (Serve Frontend & API on :8000)
-For a unified local or lightweight deploy where both the React app (static build) and the API share the SAME origin (`http://127.0.0.1:8000`):
+### Single Port Mode (:8000)
+Build + serve React bundle from FastAPI (shared origin):
+```bash
+./build_frontend.sh   # vite build
+./run_backend.sh      # starts uvicorn + static mount
+```
+Visit: http://127.0.0.1:8000
 
-1. Build the frontend:
-   ```bash
-   ./build_frontend.sh   # runs npm install (if needed) + vite build
-   ```
-2. Start the backend (will also serve the built assets if `frontend/dist` exists):
-   ```bash
-   ./run_backend.sh
-   ```
-3. Navigate to: http://127.0.0.1:8000
-
-The `backend/main.py` auto-mounts `frontend/dist` at root (`/`) with an SPA fallback. Any unknown path (without a file extension) returns `index.html` so React Router can handle client-side routes.
-
-If port 8000 is busy the script aborts (instead of auto-incrementing) to enforce a single shared origin.
+If port 8000 is busy the script aborts (does not auto-bump) to enforce same-origin semantics.
 
 ### When to Use
-- Use separate dev servers (Vite 5173 + API 8000) during active frontend development for fast HMR.
-- Use single port mode for demos, simplified local testing, or deployment to environments expecting a single process.
+- Separate dev servers for active UI iteration (fast HMR)
+- Single port for demos / simplified deployment
 
-### CORS Note
-In single-port mode you can remove `ALLOWED_ORIGINS` customization since requests are same-origin. In dual-port dev keep `ALLOWED_ORIGINS=http://localhost:5173` (default) or add additional origins as needed.
+### CORS
+Single origin → `ALLOWED_ORIGINS` may be omitted. Dual‑port dev → set `ALLOWED_ORIGINS=http://localhost:5173`.
 
-## Key Endpoints (Summary)
-- POST /profiles (create/update, 201 on first create)
-- GET /threads (cursor pagination, optional tag)
-- POST /threads
-- GET /threads/{id}
-- GET /threads/{id}/comments (sort=new|top)
-- POST /threads/{id}/comments
-- POST /reports (202 Accepted)
-- POST /blocks (creates user block)
+## Key API Endpoints
+| Method | Path | Notes |
+|--------|------|-------|
+| POST | /profiles | Create/update (201 on first create) |
+| POST | /threads | Create thread |
+| GET  | /threads | List threads (cursor) |
+| GET  | /threads/{id} | Thread detail |
+| POST | /threads/{id}/comments | Add comment |
+| GET  | /threads/{id}/comments | List comments (sort=new|top) |
+| POST | /reports | Accepts report (202) |
+| POST | /blocks | Create user block |
 
 ## Testing
-Run all tests:
+Run suite:
 ```bash
 pytest -q
 ```
-Test coverage includes: profile lifecycle, duplicate username conflict (409), thread & comment pagination, invalid token (401), rate limit (429), not found (404), validation (422).
+Coverage highlights: profiles lifecycle, duplicate username (409), pagination flows, auth failures (401), validation (422), rate limiting (429), not found (404).
 
 ## Security & Safety
-- Firebase ID token must accompany all write operations.
-- Sanitization via Bleach (allowlist of safe tags) prevents XSS.
-- Anonymity masking applied at response layer (no raw UID for anon posts).
-- Rate limiting deters spam; escalate to distributed store in production.
+- Bearer ID token required for write endpoints
+- Bleach sanitization to mitigate XSS in user content
+- UID masking for anonymous posts
+- Rate limiting to reduce spam (swap in distributed store for scale)
 
 ## Future Enhancements
-- Upvotes & Wilson score to replace static score field.
-- Moderation queue & toxicity scoring (Perspective API) to auto-flag content.
-- Search integration (Algolia / OpenSearch) for advanced tag & full-text queries.
-- WebSocket or SSE stream for real-time updates.
+- Voting + Wilson score ranking
+- Advanced moderation (toxicity scoring & queue)
+- Full‑text & tag search (OpenSearch / Algolia)
+- WebSocket or SSE live updates
+- Role‑based moderator visibility of masked UIDs
+
+## Contributing
+Issues & PRs welcome. Please open an issue describing significant feature proposals before large changes.
 
 ## License / Attribution
-Internal project for DivHacks 2025. Add license file if open-sourcing.
+Internal project for DivHacks 2025 hackathon. Add a LICENSE file before open‑sourcing.
